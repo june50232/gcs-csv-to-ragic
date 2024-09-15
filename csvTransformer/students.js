@@ -1,22 +1,30 @@
-const fs = require("fs");
-const { normalizeInput } = require("../normalizeInput");
+const { normalizeInput } = require("../utils/normalizeInput");
 
 const transformCSV = (input) => {
   const normalizedInput = normalizeInput(input);
   const lines = normalizedInput.trim().split("\n");
-  const header =
+
+  // Parse header line to find column indices
+  const header = lines[0].split(",");
+  const idxMapping = {
+    studentInfo: header.indexOf("學員家長"),
+    email: header.indexOf("電子郵件"),
+    phone: header.indexOf("電話"),
+    customID: header.indexOf("自訂ID"), // We'll treat this as the birthday field
+  };
+
+  const outputHeader =
     "索引,學員編號,學員小名/暱稱,學生姓名,性別,E-Mail,電話,生日,備註";
-  const output = [header];
+  const output = [outputHeader];
 
   const processLine = (line) => {
     const lineParts = line.split(",");
-    const studentInfo = lineParts[1] || ""; // 學員家長 info
-    const email = lineParts[2] || ""; // 電子郵件
-    const phone = lineParts[3] || ""; // 電話
+    const studentInfo = lineParts[idxMapping.studentInfo] || ""; // 學員家長 info
+    const email = lineParts[idxMapping.email] || ""; // 電子郵件
+    const phone = lineParts[idxMapping.phone] || ""; // 電話
+    const customID = lineParts[idxMapping.customID] || ""; // 自訂ID, used as birthday
     // Updated phone formatting logic to remove non-numeric characters
     const formatPhone = phone.replace(/[^\d]/g, ""); // Remove all non-numeric characters
-
-    const birthday = lineParts[lineParts.length - 1].replace(/"/g, "") || ""; // 生日
 
     // Skip the line if studentInfo does not contain "/"
     if (!studentInfo.includes("/")) {
@@ -25,14 +33,18 @@ const transformCSV = (input) => {
 
     // First split by & or ＆ to handle multiple students
     const multipleStudents = studentInfo.split(/&|＆/).map((s) => s.trim());
+    const multipleBirthdays = customID.split(/&|＆/).map((b) => b.trim());
 
-    multipleStudents.forEach((student) => {
+    multipleStudents.forEach((student, index) => {
       // Split each student by "/"
       const [name = "", nickname = "", gender = ""] = student.split("/");
 
       // Remove invalid characters from the name
       const formattedName = name.replace(/[^\u4e00-\u9fa5a-zA-Z]/g, "");
 
+      // Get the corresponding birthday or an empty string if not available
+      const birthday = multipleBirthdays[index] || "";
+      console.log({ multipleBirthdays, index, birthday });
       // Output line
       const outputLine = [
         output.length,
@@ -43,7 +55,7 @@ const transformCSV = (input) => {
         email,
         formatPhone,
         birthday,
-        studentInfo,
+        studentInfo + " " + customID,
       ].join(",");
       output.push(outputLine);
     });
@@ -57,27 +69,4 @@ const transformCSV = (input) => {
   return output.join("\n");
 };
 
-function transformCsvStudents(inputPath, outputPath) {
-  return new Promise((resolve, reject) => {
-    fs.readFile(inputPath, "utf8", (err, content) => {
-      if (err) {
-        console.error("讀取檔案錯誤:", err);
-        reject(err);
-        return;
-      }
-
-      const transformedContent = transformCSV(content);
-
-      fs.writeFile(outputPath, transformedContent, "utf8", (writeErr) => {
-        if (writeErr) {
-          console.error("寫入檔案錯誤:", writeErr);
-          reject(writeErr);
-          return;
-        }
-        console.log("轉換完成。請檢查 " + outputPath + " 查看結果。");
-        resolve();
-      });
-    });
-  });
-}
-module.exports = { transformCsvStudents };
+module.exports = { transformCSV };

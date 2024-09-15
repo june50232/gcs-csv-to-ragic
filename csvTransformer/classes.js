@@ -1,5 +1,4 @@
-const fs = require("fs");
-const { normalizeInput } = require("../normalizeInput");
+const { normalizeInput } = require("../utils/normalizeInput");
 
 // 前綴映射函數
 function mapPrefix(input, prefixMappings) {
@@ -232,109 +231,107 @@ function addYearToDate(dateStr) {
   return `${year}/${month}/${day}`;
 }
 
-function transformCsvClasses(inputPath, outputPath) {
-  return new Promise((resolve, reject) => {
-    fs.readFile(inputPath, "utf8", (err, content) => {
-      if (err) {
-        console.error("讀取檔案錯誤:", err);
-        reject(err);
-        return;
+function transformCSV(input) {
+  // 正規化輸入，將全形字符轉換為半形
+  const normalizedInput = normalizeInput(input);
+
+  // 拆分為行數據
+  const lines = normalizedInput.trim().split("\n");
+
+  // 提取 header 並創建 header 索引對應
+  const headers = lines[0].split(",").map((header) => header.trim());
+
+  // 找到所需的 header 名稱並記錄它們的索引位置
+  const headerIndex = {
+    classPlan: headers.indexOf("班級方案"),
+    totalClasses: headers.indexOf("堂數"),
+    // 其他需要的 header 可以在這裡添加
+  };
+
+  // 提取數據行，忽略 header 行
+  const data = lines.slice(1).map((line) => {
+    return line
+      .match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g)
+      .map((val) => val.replace(/^"|"$/g, "").trim());
+  });
+
+  // 遍歷每一行數據，處理並轉換
+  const transformedData = data
+    .filter((row) => {
+      const courseInfo = row[headerIndex.classPlan]?.match(/『(.+?)』(.+)/);
+      return !!courseInfo;
+    })
+    .map((row, index) => {
+      const courseInfo = row[headerIndex.classPlan].match(/『(.+?)』(.+)/);
+      const fullCourseName = normalizeInput(courseInfo[0]);
+      const courseName = extractCourseName(fullCourseName);
+      const courseType = extractCourseType(fullCourseName);
+      const courseLabel = courseInfo[1];
+      const courseDetails = courseInfo[2];
+
+      let teacherName = "";
+      let startTime = "";
+      let endTime = "";
+      let dayOfWeek = "";
+
+      // 提取時間信息
+      const timeMatch = courseDetails.match(/(\d{1,2}:\d{2})-(\d{1,2}:\d{2})/);
+      if (timeMatch) {
+        startTime = timeMatch[1];
+        endTime = timeMatch[2];
       }
 
-      const lines = content.trim().split("\n");
-      const data = lines.slice(1).map((line) => {
-        return line
-          .match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g)
-          .map((val) => val.replace(/^"|"$/g, "").trim());
-      });
+      // 提取星期幾
+      const dayMatch = courseDetails.match(/週(一|二|三|四|五|六|日)/);
+      if (dayMatch) {
+        dayOfWeek = dayMatch[1];
+      }
 
-      const transformedData = data
-        .filter((row) => {
-          const courseInfo = row[1].match(/『(.+?)』(.+)/);
-          return !!courseInfo;
-        })
-        .map((row, index) => {
-          const courseInfo = row[1].match(/『(.+?)』(.+)/);
-          const fullCourseName = normalizeInput(courseInfo[0]);
-          const courseName = extractCourseName(fullCourseName);
-          const courseType = extractCourseType(fullCourseName);
-          const courseLabel = courseInfo[1];
-          const courseDetails = courseInfo[2];
+      // 提取日期
+      const { startDate, endDate } = extractDates(courseDetails);
 
-          let teacherName = "";
-          let startTime = "";
-          let endTime = "";
-          let dayOfWeek = "";
+      // 提取教師姓名
+      const teacherMatch = courseDetails.match(
+        /-([\u4e00-\u9fa5A-Za-z\s]+)老師/
+      );
+      if (teacherMatch) {
+        teacherName = teacherMatch[1];
+      }
 
-          // 提取时间信息
-          const timeMatch = courseDetails.match(
-            /(\d{1,2}:\d{2})-(\d{1,2}:\d{2})/
-          );
-          if (timeMatch) {
-            startTime = timeMatch[1];
-            endTime = timeMatch[2];
-          }
+      // 計算單堂時數
+      let duration = "";
+      if (startTime && endTime) {
+        const start = startTime.split(":").map(Number);
+        const end = endTime.split(":").map(Number);
+        const durationMinutes =
+          end[0] * 60 + end[1] - (start[0] * 60 + start[1]);
+        duration = durationMinutes + "分鐘";
+      }
 
-          // 提取星期几
-          const dayMatch = courseDetails.match(/週(一|二|三|四|五|六|日)/);
-          if (dayMatch) {
-            dayOfWeek = dayMatch[1];
-          }
+      return {
+        索引: index + 1,
+        課程名稱: courseName,
+        課程開始日期: startDate,
+        課程結束日期: endDate,
+        上課時間: startTime,
+        下課時間: endTime,
+        星期幾: dayOfWeek,
+        單堂時數: duration,
+        商品標籤: courseLabel,
+        授課老師編號: "",
+        授課老師姓名: teacherName,
+        課程類別: courseType,
+        總堂數: row[headerIndex.totalClasses], // 使用 "堂數" 對應的索引
+        備註: courseInfo[0],
+      };
+    })
+    .filter((row) => row !== null);
 
-          // 提取日期
-          const { startDate, endDate } = extractDates(courseDetails);
-
-          // 提取教师姓名
-          const teacherMatch = courseDetails.match(
-            /-([\u4e00-\u9fa5A-Za-z\s]+)老師/
-          );
-          if (teacherMatch) {
-            teacherName = teacherMatch[1];
-          }
-
-          // 计算单堂时数
-          let duration = "";
-          if (startTime && endTime) {
-            const start = startTime.split(":").map(Number);
-            const end = endTime.split(":").map(Number);
-            const durationMinutes =
-              end[0] * 60 + end[1] - (start[0] * 60 + start[1]);
-            duration = durationMinutes + "分鐘";
-          }
-
-          return {
-            索引: index + 1,
-            課程名稱: courseName,
-            課程開始日期: startDate,
-            課程結束日期: endDate,
-            上課時間: startTime,
-            下課時間: endTime,
-            星期幾: dayOfWeek,
-            單堂時數: duration,
-            商品標籛: courseLabel,
-            授課老師編號: "",
-            授課老師姓名: teacherName,
-            課程類別: courseType,
-            總堂數: row[3],
-            備註: courseInfo[0],
-          };
-        })
-        .filter((row) => row !== null);
-
-      const outputContent = [
-        Object.keys(transformedData[0]).join(","),
-        ...transformedData.map((row) => Object.values(row).join(",")),
-      ].join("\n");
-
-      fs.writeFile(outputPath, outputContent, "utf8", (err) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve();
-        }
-      });
-    });
-  });
+  // 將處理後的數據轉換回 CSV 格式
+  return [
+    Object.keys(transformedData[0]).join(","),
+    ...transformedData.map((row) => Object.values(row).join(",")),
+  ].join("\n");
 }
 
-module.exports = { transformCsvClasses };
+module.exports = { transformCSV };
