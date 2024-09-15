@@ -1,26 +1,5 @@
 const fs = require("fs");
-
-// 輸入字串正規化函數
-function normalizeInput(str) {
-  // 替換全形字符為半形字符
-  str = str.replace(/[\uFF01-\uFF5E]/g, function (ch) {
-    return String.fromCharCode(ch.charCodeAt(0) - 0xfee0);
-  });
-
-  // 替換全形空格為半形空格
-  str = str.replace(/\u3000/g, " ");
-
-  // 移除不可見字符，例如零寬字符
-  str = str.replace(/[\u200B-\u200D\uFEFF]/g, "");
-
-  // 將各種破折號和波浪號替換為標準的 '-'
-  str = str.replace(
-    /[\u2013-\u2015\u2212\uFE63\uFF0D\u2010-\u2012\uFF5E\u301C\u223C\u2015\u2500\uFF0D－–—―～〜﹣]/g,
-    "-"
-  );
-
-  return str;
-}
+const { normalizeInput } = require("../normalizeInput");
 
 // 前綴映射函數
 function mapPrefix(input, prefixMappings) {
@@ -181,37 +160,76 @@ function extractCourseType(input) {
 }
 
 function extractDates(str) {
-  // 尝试匹配括号内的日期范围
+  // 嘗試匹配括號內的日期範圍
   const dateRangeRegex = /\((\d{1,2}\/\d{1,2})~(\d{1,2}\/\d{1,2})/;
   const dateRangeMatch = str.match(dateRangeRegex);
 
+  let startDate = "";
+  let endDate = "";
+
   if (dateRangeMatch) {
-    // 如果找到日期范围，提取 startDate 和 endDate
-    return {
-      startDate: dateRangeMatch[1],
-      endDate: dateRangeMatch[2],
-    };
+    // 如果找到日期範圍，提取 startDate 和 endDate
+    startDate = dateRangeMatch[1];
+    endDate = dateRangeMatch[2];
   } else {
-    // 如果没有找到日期范围，移除括号内的内容
+    // 如果沒有找到日期範圍，移除括號內的內容
     const strNoParentheses = str.replace(/\(.*?\)/g, "");
-    // 匹配第一个出现的日期
+    // 匹配第一個出現的日期
     const dateRegex = /(\d{1,2}\/\d{1,2})/;
     const dateMatch = strNoParentheses.match(dateRegex);
 
     if (dateMatch) {
       // 如果找到日期，startDate 和 endDate 相同
-      return {
-        startDate: dateMatch[1],
-        endDate: dateMatch[1],
-      };
+      startDate = dateMatch[1];
+      endDate = dateMatch[1];
     } else {
-      // 如果未找到任何日期，返回空字符串
-      return {
-        startDate: "",
-        endDate: "",
-      };
+      // 如果未找到任何日期，返回空字串
+      startDate = "";
+      endDate = "";
     }
   }
+
+  // 添加年份邏輯
+  if (startDate) {
+    startDate = addYearToDate(startDate);
+  }
+  if (endDate) {
+    endDate = addYearToDate(endDate);
+    // 確保 endDate 不早於 startDate
+    if (new Date(endDate) < new Date(startDate)) {
+      // 如果 endDate 早於 startDate，將 endDate 的年份加 1
+      const [year, month, day] = endDate.split("/").map(Number);
+      endDate = `${year + 1}/${month}/${day}`;
+    }
+  }
+
+  return {
+    startDate: startDate,
+    endDate: endDate,
+  };
+}
+
+function addYearToDate(dateStr) {
+  // dateStr 格式為 "M/D"
+  const [monthStr, dayStr] = dateStr.split("/");
+  const month = parseInt(monthStr, 10);
+  const day = parseInt(dayStr, 10);
+
+  const today = new Date();
+  const currentYear = today.getFullYear();
+  const currentMonth = today.getMonth() + 1; // getMonth() 返回 0-11，需加 1
+  const fourMonthsAgo = new Date(today.setMonth(today.getMonth() - 4)); // 前四個月
+
+  let year = currentYear;
+
+  // 判斷 startDate 是否早於前四個月
+  const dateToCheck = new Date(currentYear, month - 1, day); // month - 1 因為 JavaScript 的月份從 0 開始
+  if (dateToCheck < fourMonthsAgo) {
+    // 早於前四個月，年份設為下一年
+    year += 1;
+  }
+
+  return `${year}/${month}/${day}`;
 }
 
 function transformCsvClasses(inputPath, outputPath) {
@@ -242,7 +260,7 @@ function transformCsvClasses(inputPath, outputPath) {
           const courseType = extractCourseType(fullCourseName);
           const courseLabel = courseInfo[1];
           const courseDetails = courseInfo[2];
-          console.log({ fullCourseName, courseName, courseType });
+
           let teacherName = "";
           let startTime = "";
           let endTime = "";
