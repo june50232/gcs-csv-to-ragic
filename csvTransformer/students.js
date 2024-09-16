@@ -30,9 +30,9 @@ const transformCSV = (input) => {
     if (!studentInfo.includes("/")) {
       return;
     }
-
+    const cleanedStudentInfo = studentInfo.replace(/^["']|["']$/g, "");
     // First split by & or ＆ to handle multiple students
-    const multipleStudents = studentInfo.split(/&|＆/).map((s) => s.trim());
+    const multipleStudents = cleanedStudentInfo.split(/&|＆/).map((s) => s.trim());
     const multipleBirthdays = customID.split(/&|＆/).map((b) => b.trim());
 
     multipleStudents.forEach((student, index) => {
@@ -44,7 +44,6 @@ const transformCSV = (input) => {
 
       // Get the corresponding birthday or an empty string if not available
       const birthday = multipleBirthdays[index] || "";
-      console.log({ multipleBirthdays, index, birthday });
       // Output line
       const outputLine = [
         output.length,
