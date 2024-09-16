@@ -11,7 +11,9 @@ const courseTypesStandard = [
   "大童班 3~5y",
 ];
 
-function parentKidCourseType(input) {
+const aquaKidsCourseTypes = ["5~7y", "8~10y"];
+
+function parseAgeRange(input) {
   const ageRangePattern =
     /((?:0|[1-9]|1[0-2])-(?:0|[1-9]|1[0-2])個?月|(?:[0-9]|[1-9][0-9])(?:-(?:[0-9]|[1-9][0-9]))?歲|4歲以上|Aqua Kids(?:\s+(\d+(?:~\d+)?y))?)/;
   const ageRangeMatch = input.match(ageRangePattern);
@@ -27,6 +29,11 @@ function parentKidCourseType(input) {
       ageRange = "4y以上";
     }
   }
+  return ageRange;
+}
+
+function parentKidCourseType(input) {
+  const ageRange = parseAgeRange(input);
 
   const courseType =
     courseTypesStandard.find((ct) => ct.includes(ageRange)) || "";
@@ -55,22 +62,19 @@ function extractCourseType(input) {
   if (containsTechnique) {
     courseType += "招式班";
   }
-  if (containsAqua) {
-    courseType += "Aqua Kids";
-  } else {
-    let ageRangeMatch = input.match(ageRangePattern);
-    let ageRange = "";
 
-    if (ageRangeMatch) {
-      // Aqua Kids 的特殊處理
-      if (containsAqua) {
-        ageRange = ageRangeMatch[2]; // Aqua Kids 年齡範圍位於第二捕獲組
-        if (ageRange) {
-          courseType += " " + ageRange; // 如果有年齡範圍，則拼接上去
-        }
+  const ageRange = parseAgeRange(input);
+
+  if (ageRange) {
+    if (containsAqua) {
+      if (ageRange && aquaKidsCourseTypes.includes(ageRange)) {
+        courseType += "Aqua Kids " + ageRange; // 如果有年齡範圍，則拼接上去
       } else {
-        courseType = parentKidCourseType(input);
+        courseType = "";
       }
+    } else {
+      courseType +=
+        courseTypesStandard.find((ct) => ct.includes(ageRange)) || "";
     }
   }
 

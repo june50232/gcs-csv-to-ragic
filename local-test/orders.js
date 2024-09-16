@@ -1,12 +1,12 @@
 const path = require("path");
-const { transformCSV } = require("./csvTransformer/classes.js");
-const { parseFile } = require("./utils/parseFile.js");
+const { transformCSV } = require("../csvTransformer/orders.js");
+const { parseFile } = require("../utils/parseFile.js");
 
 // 執行轉換
-const inputPath = path.join(__dirname, "./before/classes/new.csv");
+const inputPath = path.join(__dirname, "../before/orders/new.csv");
 const outputPath = path.join(
   __dirname,
-  `./after/classes/${new Date().getTime()}.csv`
+  `../after/orders/${new Date().getTime()}.csv`
 );
 
 parseFile(inputPath, outputPath, transformCSV)
