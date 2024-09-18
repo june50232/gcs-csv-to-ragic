@@ -14,7 +14,7 @@ const transformCSV = (input) => {
   };
 
   const outputHeader =
-    "索引,學員編號,學員小名/暱稱,學生姓名,性別,E-Mail,電話,生日,備註";
+    "學生識別,學生姓名,學員編號,學員小名/暱稱,性別,E-Mail,電話,生日,備註";
   const output = [outputHeader];
 
   const processLine = (line) => {
@@ -32,7 +32,9 @@ const transformCSV = (input) => {
     }
     const cleanedStudentInfo = studentInfo.replace(/^["']|["']$/g, "");
     // First split by & or ＆ to handle multiple students
-    const multipleStudents = cleanedStudentInfo.split(/&|＆/).map((s) => s.trim());
+    const multipleStudents = cleanedStudentInfo
+      .split(/&|＆/)
+      .map((s) => s.trim());
     const multipleBirthdays = customID.split(/&|＆/).map((b) => b.trim());
 
     multipleStudents.forEach((student, index) => {
@@ -46,10 +48,9 @@ const transformCSV = (input) => {
       const birthday = multipleBirthdays[index] || "";
       // Output line
       const outputLine = [
-        output.length,
+        formattedName.trim(),
         "", // 學員編號 (empty in the output)
         nickname.trim(),
-        formattedName.trim(),
         gender.trim(),
         email,
         formatPhone,

@@ -34,10 +34,7 @@ function transformCSV(input) {
 
     if (data) {
       // 將結果 push 到 transformedData 數組中
-      transformedData.push({
-        索引: transformedData.length + 1,
-        ...data,
-      });
+      transformedData.push(data);
     }
   });
 

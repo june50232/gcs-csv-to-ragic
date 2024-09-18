@@ -20,10 +20,21 @@ function transformCSV(input) {
     // 其他需要的 header 可以在這裡添加
   };
 
+  function formatDate(dateTimeStr) {
+    if (!dateTimeStr) return "";
+    // 分割日期和時間
+    const [datePart] = dateTimeStr.split(" ");
+
+    // 將日期部分的 "-" 替換為 "/"
+    const formattedDate = datePart.replace(/-/g, "/");
+
+    return formattedDate;
+  }
+
   // 儲存處理後的數據
   const transformedData = [];
   const processRow = (row) => {
-    const orderDate = row[idxMapping.orderDate] || ""; // 學員家長 info
+    const orderDate = formatDate(row[idxMapping.orderDate]); // 學員家長 info
     const studentInfo = row[idxMapping.studentInfo] || ""; // 學員家長 info
     const totalDollars = row[idxMapping.totalDollars] || ""; // 學員家長 info
     const courseData = extractCourse(row, idxMapping);
@@ -37,7 +48,6 @@ function transformCSV(input) {
       .map((s) => s.trim());
 
     multipleStudents.forEach((student) => {
-
       // Split each student by "/"
       const [name = "", nickname = "", gender = ""] = student.split("/");
 
@@ -46,7 +56,14 @@ function transformCSV(input) {
 
       // 將結果 push 到 transformedData 數組中
       transformedData.push({
-        索引: transformedData.length + 1,
+        訂單識別:
+          formattedName +
+          " " +
+          orderDate +
+          " " +
+          courseData.課程識別 +
+          " " +
+          totalDollars,
         訂購編號: "",
         訂購日期: orderDate,
         訂購人: formattedName,

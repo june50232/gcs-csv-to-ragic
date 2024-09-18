@@ -27,10 +27,9 @@ function transformCSV(input) {
 
       // 將轉換後的數據推入結果數組
       transformedData.push({
-        索引: index + 1,
+        "E-Mail": row[emailColumnIndex],
         老師姓名: name,
         教師等級: level,
-        "E-Mail": row[emailColumnIndex],
         類別: "",
         老師編號: "",
         備註: row[teacherColumnIndex],

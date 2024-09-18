@@ -118,7 +118,7 @@ function extractCourseName(input) {
 
 function extractDates(str) {
   // 嘗試匹配括號內的日期範圍
-  const dateRangeRegex = /\((\d{1,2}\/\d{1,2})~(\d{1,2}\/\d{1,2})/;
+  const dateRangeRegex = /(\d{1,2}\/\d{1,2})\s*[-~～]\s*(\d{1,2}\/\d{1,2})/;
   const dateRangeMatch = str.match(dateRangeRegex);
 
   let startDate = "";
@@ -166,25 +166,29 @@ function extractDates(str) {
   };
 }
 
-function addYearToDate(dateStr) {
-  // dateStr 格式為 "M/D"
-  const [monthStr, dayStr] = dateStr.split("/");
-  const month = parseInt(monthStr, 10);
-  const day = parseInt(dayStr, 10);
-
-  const today = new Date();
-  const currentYear = today.getFullYear();
-  const currentMonth = today.getMonth() + 1; // getMonth() 返回 0-11，需加 1
-  const fourMonthsAgo = new Date(today.setMonth(today.getMonth() - 4)); // 前四個月
-
-  let year = currentYear;
-
-  // 判斷 startDate 是否早於前四個月
-  const dateToCheck = new Date(currentYear, month - 1, day); // month - 1 因為 JavaScript 的月份從 0 開始
-  if (dateToCheck < fourMonthsAgo) {
-    // 早於前四個月，年份設為下一年
-    year += 1;
+function formatDate(dateStr) {
+  if (dateStr.split("/").length === 2) {
+    const [monthStr, dayStr] = dateStr.split("/");
+    const month = parseInt(monthStr, 10);
+    const day = parseInt(dayStr, 10);
+    const today = new Date();
+    const currentYear = today.getFullYear();
+    return new Date(currentYear, month - 1, day); // month - 1 因為 JavaScript 的月份從 0 開始
+  } else if (dateStr.split("/").length === 3) {
+    const [yearStr, monthStr, dayStr] = dateStr.split("/");
+    const year = parseInt(yearStr, 10);
+    const month = parseInt(monthStr, 10);
+    const day = parseInt(dayStr, 10);
+    return new Date(year, month - 1, day); // month - 1 因為 JavaScript 的月份從 0 開始
   }
+}
+
+function addYearToDate(dateStr) {
+  // 更新年份並返回格式化的日期
+  const finalDate = formatDate(dateStr);
+  const year = finalDate.getFullYear();
+  const month = finalDate.getMonth() + 1; // 取得月份（需要加 1 因為 getMonth() 是 0 基準）
+  const day = finalDate.getDate(); // 取得日期
 
   return `${year}/${month}/${day}`;
 }
@@ -231,11 +235,24 @@ const extractCourse = (input, headerIndex) => {
     if (startTime && endTime) {
       const start = startTime.split(":").map(Number);
       const end = endTime.split(":").map(Number);
-      const durationMinutes = end[0] * 60 + end[1] - (start[0] * 60 + start[1]);
-      duration = durationMinutes + "分鐘";
+
+      // 直接計算時間差（小時）
+      duration = (end[0] + end[1] / 60 - (start[0] + start[1] / 60)).toFixed(2);
     }
 
     data = {
+      課程識別:
+        courseName +
+        " " +
+        courseType +
+        " " +
+        courseLabel +
+        " " +
+        teacherName +
+        " " +
+        startDate +
+        " " +
+        startTime,
       課程名稱: courseName,
       課程開始日期: startDate,
       課程結束日期: endDate,
