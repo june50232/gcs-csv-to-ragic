@@ -14,7 +14,7 @@ const transformCSV = (input) => {
   };
 
   const outputHeader =
-    "學生識別,學生姓名,學員編號,學員小名/暱稱,性別,E-Mail,電話,生日,備註";
+    "學員識別,學員姓名,學員編號,學員小名/暱稱,性別,E-Mail,電話,生日,說明";
   const output = [outputHeader];
 
   const processLine = (line) => {
@@ -42,13 +42,14 @@ const transformCSV = (input) => {
       const [name = "", nickname = "", gender = ""] = student.split("/");
 
       // Remove invalid characters from the name
-      const formattedName = name.replace(/[^\u4e00-\u9fa5a-zA-Z]/g, "");
+      const formattedName = name.replace(/[^\u4e00-\u9fa5a-zA-Z]/g, "").trim();
 
       // Get the corresponding birthday or an empty string if not available
       const birthday = multipleBirthdays[index] || "";
       // Output line
       const outputLine = [
-        formattedName.trim(),
+        formattedName + " " + email,
+        formattedName,
         "", // 學員編號 (empty in the output)
         nickname.trim(),
         gender.trim(),
