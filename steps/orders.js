@@ -1,9 +1,13 @@
-import { detectStorage } from "../utils/detectStorage";
+const detectStorage = require("../utils/detectStorage");
+const transformCSV = require("../step3_transform/orders");
 
-const detectOrdersCSV = () => {
-  // 執行檔案檢查
-  const csvFiles = detectStorage("orders");
-  return csvFiles;
+// 將代碼放在 async 函數中，並使用 await 等待異步操作完成
+const main = async () => {
+  const csvData = await detectStorage("orders"); // 確保等待 step1_storage 完成
+  console.log({ csvData });
+  const transformedData = await transformCSV(csvData);
+  console.log({ transformedData });
 };
 
-export default detectOrdersCSV;
+// 呼叫主函數
+main();

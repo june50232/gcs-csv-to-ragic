@@ -1,5 +1,7 @@
 const { Storage } = require("@google-cloud/storage");
 const path = require("path");
+const csv = require("csv-parser");
+const readCsv = require("./readCSV");
 
 // 設定 GCP Storage 的 bucket 和資料夾名稱
 const BUCKET_NAME = "play-and-swim"; // 替換成你的 GCP Storage bucket 名稱
@@ -25,14 +27,19 @@ const detectStorage = async (folderName) => {
 
     if (csvFiles.length === 0) {
       console.log("沒有找到新的 CSV 文件。");
+      return [];
     } else {
       console.log("找到的 CSV 文件:");
-      csvFiles.forEach((file) => console.log(file.name));
-    }
+      console.log(csvFiles[0].name);
 
-    return csvFiles;
+      // 讀取並解析 CSV 文件
+      const csvData = await readCsv(csvFiles[0]); // 調用 readCsv 函數讀取並解析 CSV
+
+      return csvData;
+    }
   } catch (error) {
     console.error("Error checking for new CSV files:", error);
+    return [];
   }
 };
 

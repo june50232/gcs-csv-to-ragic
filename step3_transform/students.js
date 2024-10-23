@@ -1,56 +1,48 @@
-const { normalizeInput } = require("../utils/normalizeInput");
 const { getFormattedToday } = require("../utils/formatTime");
 
 const transformCSV = (input) => {
-  const normalizedInput = normalizeInput(input);
-  const lines = normalizedInput.trim().split("\n");
-
-  // Parse header line to find column indices
-  const header = lines[0].split(",");
-  const idxMapping = {
-    studentInfo: header.indexOf("學員家長"),
-    email: header.indexOf("電子郵件"),
-    phone: header.indexOf("電話"),
-    customID: header.indexOf("自訂ID"), // We'll treat this as the birthday field
-  };
-
   let result = [];
 
   const processLine = (line) => {
-    const lineParts = line.split(",");
-    const studentInfo = lineParts[idxMapping.studentInfo] || ""; // 學員家長 info
-    const email = lineParts[idxMapping.email] || ""; // 電子郵件
-    const phone = lineParts[idxMapping.phone] || ""; // 電話
-    const customID = lineParts[idxMapping.customID] || ""; // 自訂ID, used as birthday
-    // Updated phone formatting logic to remove non-numeric characters
-    let formatPhone = phone.replace(/[^\d]/g, ""); // Remove all non-numeric characters
+    const studentInfo = line["學員家長"] || ""; // 學員家長 info
+    const email = line["電子郵件"] || ""; // 電子郵件
+    const phone = line["電話"] || ""; // 電話
+    const customID = line["自訂ID"] || ""; // 自訂ID, used as birthday
+
+    // 清理電話號碼格式，移除非數字字符
+    let formatPhone = phone.replace(/[^\d]/g, ""); // 移除所有非數字字符
+
     // 檢查電話號碼是否為 9 碼且開頭為 9
     if (formatPhone.length === 9 && formatPhone.startsWith("9")) {
       // 在開頭補 0
       formatPhone = "0" + formatPhone;
     }
 
-    // Skip the line if studentInfo does not contain "/"
+    // 如果 studentInfo 中不包含 "/"，則跳過該行
     if (!studentInfo.includes("/") || studentInfo.split("/").length < 3) {
       return;
     }
+
+    // 移除可能的引號
     const cleanedStudentInfo = studentInfo.replace(/^["']|["']$/g, "");
-    // First split by & or ＆ to handle multiple students
+
+    // 使用 & 或 ＆ 處理多位學員
     const multipleStudents = cleanedStudentInfo
       .split(/&|＆/)
       .map((s) => s.trim());
     const multipleBirthdays = customID.split(/&|＆/).map((b) => b.trim());
 
     multipleStudents.forEach((student, index) => {
-      // Split each student by "/"
+      // 依據 "/" 拆分學員資訊
       const [name = "", nickname = "", gender = ""] = student.split("/");
 
-      // Remove invalid characters from the name
+      // 清理名字中的無效字符（非中文或英文字母）
       const formattedName = name.replace(/[^\u4e00-\u9fa5a-zA-Z]/g, "").trim();
 
-      // Get the corresponding birthday or an empty string if not available
+      // 獲取對應的生日或空字符串
       const birthday = multipleBirthdays[index] || "";
-      // Output line
+
+      // 生成輸出結果
       const outputLine = {
         1000518:
           formattedName.trim() + " " + nickname.trim() + " " + gender.trim(),
@@ -64,16 +56,16 @@ const transformCSV = (input) => {
         3003371: getFormattedToday(),
         1000550: getFormattedToday(true),
       };
+
+      // 將每一個學員的資料加入結果陣列
       result.push(outputLine);
     });
   };
 
-  // Process all lines, skipping the header
-  for (let i = 1; i < lines.length; i++) {
-    processLine(lines[i]);
-  }
+  // 處理每一行，input 已經是一個物件陣列，無需解析 CSV
+  input.forEach(processLine);
 
   return result;
 };
 
-module.exports = { transformCSV };
+module.exports = transformCSV;

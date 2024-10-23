@@ -183,7 +183,7 @@ function addYearToDate(dateStr) {
 }
 
 const extractCourse = (input, headerIndex) => {
-  const courseInfo = input[headerIndex.classPlan].match(/『(.+?)』(.+)/);
+  const courseInfo = input["品項"].match(/『(.+?)』(.+)/); // 使用品項欄位
   if (!courseInfo) return null;
 
   let data = null;
@@ -232,7 +232,7 @@ const extractCourse = (input, headerIndex) => {
   }
 
   data = {
-    1000513:
+    1000516:
       courseLabel +
       " " +
       courseName +
@@ -252,7 +252,7 @@ const extractCourse = (input, headerIndex) => {
     1000415: courseLabel,
     3003227: teacherName,
     1000479: courseType,
-    3003188: input[headerIndex.totalClasses] || "", // 使用 "堂數" 對應的索引
+    3003188: input["堂數"] || "", // 使用 "堂數" 對應的索引
     1000514: courseInfo[0],
     1000522: getFormattedToday(),
     1000553: getFormattedToday(true),

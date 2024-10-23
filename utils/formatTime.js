@@ -35,7 +35,6 @@ function formateYearMonthDay(dateTimeStr) {
 }
 
 module.exports = {
-  getFormattedDateTime,
   getFormattedToday,
   formateYearMonthDay,
 };
