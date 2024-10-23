@@ -1,4 +1,5 @@
 const { normalizeInput } = require("../utils/normalizeInput");
+const { getFormattedToday } = require("../utils/formatTime");
 
 function transformCSV(input) {
   // 將輸入正規化
@@ -22,26 +23,22 @@ function transformCSV(input) {
     // 獲取授課老師欄位資訊
     const teacherInfo = row[teacherColumnIndex].match(/『(.*?)』\s*(.*?)老師/);
     if (teacherInfo && row[teacherColumnIndex] !== "") {
-      const level = teacherInfo[1]; // 教師等級
-      const name = teacherInfo[2]; // 教師姓名
+      const level = teacherInfo[1].trim(); // 教師等級
+      const name = teacherInfo[2].trim(); // 教師姓名
 
       // 將轉換後的數據推入結果數組
       transformedData.push({
-        "E-Mail": row[emailColumnIndex],
-        老師姓名: name,
-        教師等級: level,
-        "OB display": row[teacherColumnIndex],
+        3003218: row[emailColumnIndex].trim(),
+        3003169: name,
+        1000485: level,
+        1000621: row[teacherColumnIndex].trim(),
+        3003402: getFormattedToday(),
+        1000551: getFormattedToday(true),
       });
     }
   });
 
-  // 構建 CSV 格式的結果
-  const resultCSV = [
-    Object.keys(transformedData[0]).join(","),
-    ...transformedData.map((row) => Object.values(row).join(",")),
-  ].join("\n");
-
-  return resultCSV;
+  return transformedData;
 }
 
 module.exports = { transformCSV };

@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "play-and-swim",
+  "private_key_id": "29fc056371c7483200168f3ebd5ae73801a1dd9d",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC2d019ux7h8Gdy\n1xT+ahw75Vp2yMHYsXSE1orU9mruRVDghpCc1AOt395MU/2YQH2GdmvWPxY7LtEu\nW8WDERjm85J9d+aOh3BnfdUB4n2yU6LbSzqqU1fBIJZhZgLRZbrTFl0jtSe0lVjL\nLIHSCiPxNCuCzhpberhnkHYLDE+tlGnihdpNPqKLaofgwBUAcldn57zMUV+TxaX0\n0Q0K3rCTwQDM5a7YzCJSn7zJRhE5/ev2IMW4LiAXMcfu8CfxR72dQKbx0cPjr4Id\ng9hEszFAWz6z97xDsS02G3pHy5yf7sR2soPhOp/s2ufWVOnIOlUH6131BLJbTe+W\nYASFPwO9AgMBAAECggEATweuWxpMfnzTOaTZ1XXdI74rqA49E5+Mwapw+FuAphIE\nvTLbeOnFbC5uCK5KRQMNu0sYWvP5K4oUFRmvmxyxJfryhICFrk8QSurv8wCIA9CA\n1a2oS7SMajw0lhwKdWqz+BCUJ86jU25qRpnQ4sn8llDL1bxyIxQswcKKti9PZXUJ\nJACYiDUoTY0VaRZGndEJSQTX+0lRixfQdULp0FdkKn4L+ZkTkbWfn5cGdS9jAOpn\n/QfSL/LVPJiosuNTnU1cyYqHw1JxkVpK4a89+yv9hHTmVn1IF4CoaPpO3d1d3Ulq\ncvoZ+1pCSf+nPhBkKdTYVvzhDr8erQU9kGiyVT7y+wKBgQD5RbbTfdQfgiqVHf+m\nC6416KOuCbiIeHtcB8G84YyK7wWYn7CnfpkjZ89F6YYFEb4WeieT2HV0T/hfQ+2+\no0BZ+VpgV1PEFTO8/a/QWC2p45FcYPw2WqRSScjeC04DfGJHGjOOssEbqx/tkKEn\nZzedcli/hvzIagwMfau4v9y/owKBgQC7ZAHBpKXRk/jHE8KowY1YjRzmBFz1K9PG\nEnT8EaB/MOvQpvxtCRVYBRyJXEXK/pV1ThaKJ8oe2Sr57n3VA4sxKdsSZCArd8dw\ncGVFXCjh8AhxroVoulJ3ejK/qP8y/w6AQLV54OFVgGWzAS+di2vBmd0YREOGCDg+\nz4rVuv3lHwKBgQC0ssi5v3lJ7f4YYsqz/7ul8KLWws02gMBMEoNq/MX44RRZc0mH\n4cn5VIN41rQEcLwvZxXRoxRh4KbXyFJL4+P+VTgipqtedVAwLGaKzaEsin8RTG0I\nqeR8kmg+Lku7UyubB29gfkxmVkKq4DEycyxpwj57eMs+LUHWvDMDlnHbqQKBgDWR\ntkrUNa7+/Rx0Eq7Jfg21cXB0CNrxp321Iwo4Q8h4hMFGK11EPnzGIU1HOpB4TOOW\n6iyeiVJeRMHkIsa1V6I7U+wjAWtLt5D2II0+dlV4mAFfobW5pf+PyFgwCJxce5nA\nZeCsn94gcXJFwYXpKGnVAXaBdUgoq2ORUyAcb56DAoGBAPP5ADrYMDRcp2IZ5r9r\nLe2XoFGZMuMCCs9ISdxjjr5a1XezFWnaY+tz0B0q55EBEqfaOuQnB7PprslMUswT\nAUG3jphJA4rKTwNsDtAGFH7wT1j/nY6jb/J8g7SAHPrTTtB6ttLhqB08CvIFGmOD\n1A+sxb/mFtor7cbVNput5s4Y\n-----END PRIVATE KEY-----\n",
+  "client_email": "june-279@play-and-swim.iam.gserviceaccount.com",
+  "client_id": "106487781729278100458",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/june-279%40play-and-swim.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

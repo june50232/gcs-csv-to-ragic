@@ -3,10 +3,12 @@ require("dotenv").config();
 const Papa = require("papaparse");
 const fs = require("fs");
 const axios = require("axios");
+const path = require("path");
 
 const RAGIC_API_URL = process.env.RAGIC_API_URL_TEACHERS;
 const RAGIC_API_KEY = process.env.RAGIC_API_KEY;
 const RAGIC_TEACHERS_ID = process.env.RAGIC_TEACHERS_ID;
+const RAGIC_TEACHERS_PARAMS = process.env.RAGIC_TEACHERS_PARAMS;
 
 if (!RAGIC_API_URL || !RAGIC_API_KEY) {
   console.error("Please set RAGIC_API_URL and RAGIC_API_KEY in your .env file");
@@ -17,18 +19,31 @@ function readCSV(filePath) {
   return new Promise((resolve, reject) => {
     const fileContent = fs.readFileSync(filePath, "utf8");
     Papa.parse(fileContent, {
-      complete: (results) => resolve(results.data),
+      complete: (results) => {
+        const mappedData = results.data.map((row) => {
+          const mappedRow = {};
+          Object.entries(RAGIC_TEACHERS_PARAMS).forEach(
+            ([csvHeader, ragicId]) => {
+              if (row.hasOwnProperty(csvHeader)) {
+                mappedRow[ragicId] = row[csvHeader];
+              }
+            }
+          );
+          return mappedRow;
+        });
+        resolve(mappedData);
+      },
       error: (error) => reject(error),
       header: true,
     });
   });
 }
 
-async function searchByEmail(email) {
+async function searchByKey(key) {
   try {
     const response = await axios.get(
       `${RAGIC_API_URL}?where=${RAGIC_TEACHERS_ID},eq,${encodeURIComponent(
-        email
+        key
       )}`,
       {
         headers: {
@@ -47,7 +62,7 @@ async function searchByEmail(email) {
 
 async function createOrUpdateInRagic(data) {
   try {
-    const existingRecords = await searchByEmail(data.E - Mail);
+    const existingRecords = await searchByKey(data[RAGIC_TEACHERS_ID]);
     let response;
     if (Object.keys(existingRecords).length > 0) {
       // 記錄已存在，進行更新
@@ -92,6 +107,6 @@ async function importCSVToRagic(csvFilePath) {
     console.error("Import failed:", error);
   }
 }
-
+const inputPath = path.join(__dirname, "../before/teachers/new.csv");
 // 使用示例
-importCSVToRagic("path/to/your/file.csv");
+importCSVToRagic(inputPath);

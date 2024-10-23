@@ -1,4 +1,5 @@
 const { normalizeInput } = require("../utils/normalizeInput");
+const { getFormattedToday } = require("../utils/formatTime");
 
 const transformCSV = (input) => {
   const normalizedInput = normalizeInput(input);
@@ -13,9 +14,7 @@ const transformCSV = (input) => {
     customID: header.indexOf("自訂ID"), // We'll treat this as the birthday field
   };
 
-  const outputHeader =
-    "學員識別,學員姓名,學員編號,學員小名/暱稱,性別,E-Mail,電話,生日,備註";
-  const output = [outputHeader];
+  let result = [];
 
   const processLine = (line) => {
     const lineParts = line.split(",");
@@ -24,10 +23,15 @@ const transformCSV = (input) => {
     const phone = lineParts[idxMapping.phone] || ""; // 電話
     const customID = lineParts[idxMapping.customID] || ""; // 自訂ID, used as birthday
     // Updated phone formatting logic to remove non-numeric characters
-    const formatPhone = phone.replace(/[^\d]/g, ""); // Remove all non-numeric characters
+    let formatPhone = phone.replace(/[^\d]/g, ""); // Remove all non-numeric characters
+    // 檢查電話號碼是否為 9 碼且開頭為 9
+    if (formatPhone.length === 9 && formatPhone.startsWith("9")) {
+      // 在開頭補 0
+      formatPhone = "0" + formatPhone;
+    }
 
     // Skip the line if studentInfo does not contain "/"
-    if (!studentInfo.includes("/")) {
+    if (!studentInfo.includes("/") || studentInfo.split("/").length < 3) {
       return;
     }
     const cleanedStudentInfo = studentInfo.replace(/^["']|["']$/g, "");
@@ -47,18 +51,20 @@ const transformCSV = (input) => {
       // Get the corresponding birthday or an empty string if not available
       const birthday = multipleBirthdays[index] || "";
       // Output line
-      const outputLine = [
-        formattedName + " " + email,
-        formattedName,
-        "", // 學員編號 (empty in the output)
-        nickname.trim(),
-        gender.trim(),
-        email,
-        formatPhone,
-        birthday,
-        studentInfo + " " + customID,
-      ].join(",");
-      output.push(outputLine);
+      const outputLine = {
+        1000518:
+          formattedName.trim() + " " + nickname.trim() + " " + gender.trim(),
+        1000414: formattedName.trim(),
+        3003197: nickname.trim(),
+        3003198: gender.trim(),
+        3003201: email,
+        3003199: formatPhone,
+        3003200: birthday,
+        1000521: studentInfo + " " + customID,
+        3003371: getFormattedToday(),
+        1000550: getFormattedToday(true),
+      };
+      result.push(outputLine);
     });
   };
 
@@ -67,7 +73,7 @@ const transformCSV = (input) => {
     processLine(lines[i]);
   }
 
-  return output.join("\n");
+  return result;
 };
 
 module.exports = { transformCSV };
