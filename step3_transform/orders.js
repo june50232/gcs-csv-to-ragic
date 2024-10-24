@@ -1,4 +1,4 @@
-const { extractCourse } = require("../utils/courses");
+const { extractCourse } = require("../utils/courses_usedBy_orders");
 const {
   getFormattedToday,
   formateYearMonthDay,
