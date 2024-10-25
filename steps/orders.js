@@ -1,5 +1,5 @@
-const detectStorage = require("../utils/detectStorage");
-const transformCSV = require("../step3_transform/orders");
+const detectStorage = require("../utils/step1_detectStorage");
+const transformCSV = require("../step2_transform/orders");
 
 // 將代碼放在 async 函數中，並使用 await 等待異步操作完成
 const main = async () => {

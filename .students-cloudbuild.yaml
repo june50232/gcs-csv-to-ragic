@@ -1,0 +1,6 @@
+steps:
+  - name: 'gcr.io/cloud-builders/npm'
+    args: ['install']
+  - name: 'gcr.io/cloud-builders/node'
+    args: ['node', 'steps/students.js'] # 替換為你要執行的腳本路徑
+
